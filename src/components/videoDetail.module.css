@@ -1,0 +1,20 @@
+.container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Roboto", sans-serif;
+}
+
+.videoContainer p {
+  line-height: 1.2;
+}
+
+.video {
+  width: 800px;
+  height: 400px;
+}
+
+.title {
+  margin: 10px 0;
+  font-size: 18px;
+}

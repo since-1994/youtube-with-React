@@ -1,52 +1,37 @@
-import React, {Component} from 'react';
-import './App.css';
-import NavBar from './components/navBar';
-import styles from './app.module.css';
-import Videos from './components/videos';
-import VideoDetail from './components/videoDetail';
+import React, { useEffect, useState } from 'react';
+import NavBar from './components/nav_bar/nav_bar';
+import VideoList from './components/video_list/video_list';
 
+function App(props) {
+  const [videos, setVideos] = useState([]);
+  const [isSearch, setIsSearch] = useState(false);
 
-class App extends React.Component {
-  state= {
-    videos:[],
-    detail: false,
-    videoId: ""
-  };
-
-  hadleVideoClick(id){
-    console.log(id);
-    this.setState({detail: true, videoId:id});
-  }
-  
-  async componentDidMount(){
-    const API_KEY = "AIzaSyAm5llrXkmL8Hd9AwLwxH41PrvxQZ_TFOQ";
-    const MAX = 20;
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos/?part=snippet&chart=mostPopular&regionCode=kr&maxResults=${MAX}&key=${API_KEY}`);
+  const key = "AIzaSyA4Xf-ivZvKzpAg3Uxvr7az8vd6wtIW6_g";
+  const base = "https://www.googleapis.com/youtube/v3";
+  const getPopular = async () => {
+    const res = await fetch(`${base}/videos?part=snippet&chart=mostPopular&maxResults=25&regionCode=kr&key=${key}`);
     const data = await res.json();
-    const videos = data.items;
-    this.setState({videos});
+    const items = data.items;
+    setVideos(items);
+    setIsSearch(false);
+  };
+  useEffect(getPopular, []);
+  
+  const onSubmit = async (query) => {
+    const res = await fetch(`${base}/search?part=snippet&q=${query}&type=video&maxResults=25&regionCode=kr&key=${key}`);
+    const data = await res.json();
+    const items = data.items;
+    setVideos(items);
+    setIsSearch(true);
   }
-  render(){
-    const {videos, detail, videoId} = this.state;
-    if(detail){
-      const video = videos.find(video => {
-        return video.id === videoId;
-      })
-      return (
-        <div className = {styles.body}>
-          <NavBar />
-          <VideoDetail video={video} videos={videos} onVideoClick = {this.hadleVideoClick.bind(this)}/>
-        </div>
-      )
-    }else{
-      return (
-        <div className = {styles.body}>
-          <NavBar />
-          <Videos videos={videos} onVideoClick = {this.hadleVideoClick.bind(this)}/>
-        </div>
-      );
-    }
-  }
+
+
+  return (
+    <div>
+      <NavBar search={onSubmit} goHome={getPopular}/>
+      <VideoList videos={videos} isSearch={isSearch} />
+    </div>
+  );
 }
 
 export default App;

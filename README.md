@@ -1,70 +1,127 @@
-# Getting Started with Create React App
+# clone YouTube for learning react
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## what i learned
 
-## Available Scripts
+### useState
 
-In the project directory, you can run:
+function Component에서 class Component처럼 state를 사용하기 위해서 useState를 사용했습니다.
 
-### `yarn start`
+- 예시
+  ```javascript
+  const [videos, setVideos] = useState([]);
+  ```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### useRef
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+function Component에서 class Component처럼 `React.createRef()`를 사용하기 위해 useRef를 사용했습니다.
 
-### `yarn test`
+- 예시
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  ```javascript
+  import { useRef } from "react";
+  const NavBar = ({ search }) => {
+    const inputRef = useRef();
+    const onSubmit = (e) => {
+      e.preventDefault();
+      search(inputRef.current.value);
+    };
+    return (
+      <nav className={styles.nav}>
+        <form onSubmit={onSubmit}>
+          <input ref={inputRef} type="text" />
+        </form>
+      </nav>
+    );
+  };
+  ```
 
-### `yarn build`
+### memo
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+class PureComponent처럼 function Component에서 state나 props의 변화가 없을 때 re-render되는 것을 막기 위해 memo를 사용해보았습니다.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## what i solved
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 1. MVC design pattern을 위해 `App Component`에서 youtube api를 통해 data를 받아오는 과정을 class를 만들어 분리시켰습니다.
 
-### `yarn eject`
+- before(app.jsx)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  하나의 component에 많은 기능이 담겨 있어 관리하기가 어렵습니다.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  ```javascript
+  import NavBar from "./components/nav_bar/nav_bar";
+  import VideoDetail from "./components/video_detail/video_detail";
+  import VideoList from "./components/video_list/video_list";
+  import styles from "./app.module.css";
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  function App(props) {
+    const key = key;
+    const base = "https://www.googleapis.com/youtube/v3";
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    const [videos, setVideos] = useState([]);
 
-## Learn More
+    const getPopular = async () => {
+      const res = await fetch(
+        `${base}/videos?part=snippet&chart=mostPopular&maxResults=25&regionCode=kr&key=${key}`
+      );
+      const data = await res.json();
+      const items = data.items;
+      setVideos(items);
+    };
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    useEffect(getPopular, []);
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    const onSubmit = async (query) => {
+      const res = await fetch(
+        `${base}/search?part=snippet&q=${query}&type=video&maxResults=25&regionCode=kr&key=${key}`
+      );
+      const data = await res.json();
+      const items = data.items.map((item) => {
+        return { ...item, id: item.id.videoId };
+      });
+      setVideos(items);
+    };
 
-### Code Splitting
+    return (
+      <div>
+        <NavBar search={onSubmit} goHome={getPopular} />
+        <VideoList videos={videos} videoDetail={videoDetail} />
+      </div>
+    );
+  }
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+  export default App;
+  ```
 
-### Analyzing the Bundle Size
+- after(youtube.js)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+  ```javascript
+  class Youtube {
+    constructor(key) {
+      this.key = key;
+      this.base = "https://www.googleapis.com/youtube/v3";
+    }
+    getPopular = async () => {
+      const res = await fetch(
+        `${this.base}/videos?part=snippet&chart=mostPopular&maxResults=25&regionCode=kr&key=${this.key}`
+      );
+      const data = await res.json();
+      const items = data.items;
+      return items;
+    };
 
-### Making a Progressive Web App
+    getSearchResult = async (query) => {
+      const res = await fetch(
+        `${this.base}/search?part=snippet&q=${query}&type=video&maxResults=25&regionCode=kr&key=${this.key}`
+      );
+      const data = await res.json();
+      const items = data.items.map((item) => {
+        return { ...item, id: item.id.videoId };
+      });
+      return items;
+    };
+  }
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+  export default Youtube;
+  ```
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 2. 동일한 component를 다른 페이지에서 사용하기 위해 css에 관한 설정을 props를 통해 넘겨주었습니다.

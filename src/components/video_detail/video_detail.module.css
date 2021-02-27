@@ -1,0 +1,20 @@
+.detail {
+  padding: 0 20px;
+}
+.info > * {
+  margin: 10px;
+}
+.title {
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.channelTitle {
+  font-size: 1.2rem;
+  color: rgba(0, 0, 0, 0.8);
+}
+.desc {
+  margin-top: 20px;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}

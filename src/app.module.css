@@ -1,7 +1,21 @@
 * {
   box-sizing: border-box;
 }
-.body {
-  width: 100%;
-  padding: 0 150px;
+
+@media (max-width: 700px) {
+  .content {
+    flex-direction: column;
+  }
+}
+
+.content {
+  display: flex;
+}
+
+.detail {
+  flex: 1 1 70%;
+}
+
+.list {
+  flex: 1 1 30%;
 }
